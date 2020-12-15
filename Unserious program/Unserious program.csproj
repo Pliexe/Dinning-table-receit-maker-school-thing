@@ -5,6 +5,7 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <RootNamespace>Unserious_program</RootNamespace>
     <UseWindowsForms>true</UseWindowsForms>
+    <AssemblyName>Unserious_program</AssemblyName>
   </PropertyGroup>
 
 </Project>

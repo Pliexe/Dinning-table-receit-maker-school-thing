@@ -77,6 +77,7 @@ namespace Unserious_program
             }
 
             checkout.Clear();
+            bindingSource.ResetBindings(false);
         }
 
         private void button3_Click(object sender, EventArgs e)
