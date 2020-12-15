@@ -35,11 +35,32 @@ namespace Unserious_program
         {
             foreach(DrinkCheckBox checkBox in drinksGroupBox.Controls.OfType<DrinkCheckBox>())
             {
+                
+
                 if (checkout.Exists(x => x.name == checkBox.Name))
                 {
-                    if (!checkBox.Checked) checkout.RemoveAt(checkout.FindIndex(x => x.name == checkBox.Name));
+                    
+                    if (!checkBox.Checked) checkout.RemoveAll(x => x.name == checkBox.Name);
+                    else
+                    {
+                        int count = checkout.FindAll(x => x.name == checkBox.Name).Count;
+                        if (count > checkBox.numericUp.Value)
+                        {
+                            int removed = count - (int)checkBox.numericUp.Value;
+
+                            for (int i = 0; i < removed; i++) checkout.RemoveAt(checkout.FindIndex(x => x.name == checkBox.Name));
+                        }
+                        else if (count < checkBox.numericUp.Value)
+                        {
+                            int add = (int)checkBox.numericUp.Value - count;
+
+                            for (int i = 0; i < add; i++) checkout.Add(new Drink(checkBox.Name, checkBox.drinkPrice));
+                        }
+                    }
                 }
-                else if (checkBox.Checked) checkout.Add(new Drink(checkBox.Name, checkBox.drinkPrice));
+                else if (checkBox.Checked)
+                    if(checkBox.numericUp.Value > 0)
+                        for (int i = 0; i < checkBox.numericUp.Value; i++) checkout.Add(new Drink(checkBox.Name, checkBox.drinkPrice));
             }
             bindingSource.ResetBindings(false);
         }
@@ -49,11 +70,19 @@ namespace Unserious_program
             drinksGroupBox.Controls.Clear();
             for (int i = 0; i < drinks.Count; i++)
             {
-                DrinkCheckBox checkBox = new DrinkCheckBox() { Text = drinks[i].name+", "+ drinks[i].price + " RSD", Name = drinks[i].name, drinkPrice = drinks[i].price };
-                checkBox.Width = drinksGroupBox.Width - 10;
-                checkBox.Location = new Point(drinksGroupBox.Width / 2 - checkBox.Width / 2, (i+1) * 20);
+                int checkBoxWidth = drinksGroupBox.Width / 2 - 10;
+                NumericUpDown numeric = new NumericUpDown { Location = new Point(checkBoxWidth + 10, (i + 1) * 20), Width = 100 };
+                numeric.ValueChanged += UpdateCart;
+                DrinkCheckBox checkBox = new DrinkCheckBox() {
+                    Location = new Point(drinksGroupBox.Width / 2 - checkBoxWidth, (i+1) * 20),
+                    Width = checkBoxWidth,
+                    Text = drinks[i].name + ", " + drinks[i].price + " RSD", Name = drinks[i].name,
+                    drinkPrice = drinks[i].price,
+                    numericUp = numeric };
                 checkBox.CheckStateChanged += UpdateCart;
+
                 drinksGroupBox.Controls.Add(checkBox);
+                drinksGroupBox.Controls.Add(numeric);
             }
         }
 
@@ -137,10 +166,18 @@ namespace Unserious_program
     public class DrinkCheckBox : CheckBox
     {
         public int drinkPrice;
+        public NumericUpDown numericUp;
 
         public override string ToString()
         {
             return Text;
         }
+    }
+
+    public class CheckoutItem
+    {
+        public string name;
+        public int price;
+        public int times = 1;
     }
 }
